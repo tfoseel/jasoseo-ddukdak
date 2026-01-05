@@ -95,12 +95,41 @@ export default function InterviewPage() {
                             다음 단계로 <ChevronRight className="ml-2 w-4 h-4" />
                         </Button>
                     ) : (
-                        <Link href="/preview">
-                            <Button className="px-8 rounded-full bg-green-600 hover:bg-green-700">
-                                인터뷰 완료 및 초안 확인
-                            </Button>
-                        </Link>
+                        <Button
+                            onClick={async () => {
+                                try {
+                                    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+                                    if (!publishableKey) {
+                                        alert("Stripe Publishable Key가 설정되지 않았습니다. .env.local을 확인해주세요.");
+                                        return;
+                                    }
+
+                                    const res = await fetch("/api/checkout", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ items: [] }),
+                                    });
+                                    const data = await res.json();
+
+                                    if (data.error) {
+                                        alert(data.error);
+                                        return;
+                                    }
+
+                                    const stripe = (window as any).Stripe(publishableKey);
+                                    await stripe.redirectToCheckout({ sessionId: data.sessionId });
+                                } catch (err) {
+                                    console.error("Checkout failed:", err);
+                                    alert("결제 페이지로 이동하는 중 오류가 발생했습니다.");
+                                }
+                            }}
+                            className="px-8 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
+                        >
+                            인터뷰 완료 및 초안 결제하기
+                        </Button>
+
                     )}
+
                 </div>
             </footer>
         </div>

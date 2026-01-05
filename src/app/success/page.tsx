@@ -22,40 +22,58 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function SuccessPage() {
-    const { basicInfo, projects, deepDiveAnswers, tone, generatedDrafts, updateGeneratedDrafts } = useInterviewStore();
-    const [isGenerating, setIsGenerating] = useState(generatedDrafts?.length === 0);
+    const { basicInfo, projects, deepDiveAnswers, tone, generatedDrafts, updateGeneratedDrafts, updateDraftAtIndex } = useInterviewStore();
+    const [isGenerating, setIsGenerating] = useState(!generatedDrafts || generatedDrafts.length === 0);
+    const [generatingIndex, setGeneratingIndex] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
     useEffect(() => {
-        if (isGenerating) {
-            const generate = async () => {
+        if (isGenerating && basicInfo.questions.length > 0) {
+            const generateSequentially = async () => {
                 try {
                     setError(null);
-                    const response = await fetch("/api/generate", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ basicInfo, projects, deepDiveAnswers, tone }),
-                    });
 
-                    const data = await response.json();
+                    // Initialize drafts array with empty strings if not already preset
+                    if (!generatedDrafts || generatedDrafts.length === 0) {
+                        updateGeneratedDrafts(new Array(basicInfo.questions.length).fill(""));
+                    }
 
-                    if (data.drafts) {
-                        updateGeneratedDrafts(data.drafts);
-                    } else if (data.error) {
-                        setError(data.error);
+                    for (let i = 0; i < basicInfo.questions.length; i++) {
+                        // Skip if already generated (useful for partial resumes if we add that later)
+                        if (generatedDrafts && generatedDrafts[i]) continue;
+
+                        setGeneratingIndex(i);
+
+                        const response = await fetch("/api/generate", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                data: { basicInfo, projects, deepDiveAnswers, tone },
+                                questionIndex: i
+                            }),
+                        });
+
+                        const result = await response.json();
+
+                        if (result.draft) {
+                            updateDraftAtIndex(i, result.draft);
+                        } else if (result.error) {
+                            throw new Error(`문항 ${i + 1} 생성 실패: ${result.error}`);
+                        }
                     }
                 } catch (err: any) {
                     console.error("Generation failed:", err);
-                    setError("생성 도중 오류가 발생했습니다. 다시 시도해주세요.");
+                    setError(err.message || "생성 도중 오류가 발생했습니다. 다시 시도해주세요.");
                 } finally {
                     setIsGenerating(false);
                 }
             };
 
-            generate();
+            generateSequentially();
         }
-    }, [isGenerating, basicInfo, projects, deepDiveAnswers, tone, updateGeneratedDrafts]);
+    }, [isGenerating, basicInfo, projects, deepDiveAnswers, tone, updateGeneratedDrafts, updateDraftAtIndex]);
+
 
     const handleRegenerate = () => {
         updateGeneratedDrafts([]);
@@ -84,12 +102,13 @@ export default function SuccessPage() {
                 </div>
                 <div className="space-y-3 max-w-sm">
                     <h1 className="text-2xl font-black text-gray-900 leading-tight">
-                        당신만의 특별한 초안을<br />생성하고 있습니다
+                        {generatingIndex + 1}번째 문항을<br />생성하고 있습니다
                     </h1>
                     <p className="text-gray-500 text-sm font-medium break-keep">
-                        인터뷰 내용을 바탕으로 AI가 최적의 문장을 조립하고 있습니다. 약 10초 정도 소요될 수 있습니다.
+                        전체 {basicInfo.questions.length}개 문항 중 {generatingIndex + 1}번째 답변을 작성 중입니다. 최적의 문장 조합을 위해 문항당 약 10~15초가 소요됩니다.
                     </p>
                 </div>
+
                 <div className="flex gap-1.5">
                     {[0, 1, 2].map(i => (
                         <motion.div
@@ -110,11 +129,8 @@ export default function SuccessPage() {
                 <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Logo />
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="hidden sm:flex" onClick={() => window.print()}>
-                            <Download className="w-4 h-4 mr-2" /> 정식 PDF 저장
-                        </Button>
                         <Link href="/">
-                            <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800">
+                            <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800 rounded-xl px-5">
                                 처음으로 돌아가기
                             </Button>
                         </Link>
@@ -200,16 +216,19 @@ export default function SuccessPage() {
                 </section>
 
 
-                <section className="bg-blue-600 rounded-[40px] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8">
-                    <div className="space-y-2 text-center md:text-left">
-                        <h3 className="text-2xl font-bold">결과물이 마음에 드시나요?</h3>
-                        <p className="text-blue-100 text-sm opacity-80">이메일로 초안 전체를 전송해 드릴까요?</p>
+                <section className="bg-blue-600 rounded-[40px] p-10 text-white flex flex-col items-center justify-center text-center gap-6 shadow-2xl shadow-blue-200">
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-bold">초안이 마음에 드시나요?</h3>
+                        <p className="text-blue-100 text-sm opacity-80 max-w-md mx-auto">
+                            복사한 문항을 바탕으로 나만의 어조를 한 스푼만 얹어보세요. <br className="hidden sm:block" />
+                            당신의 합격을 자소서 뚝딱이 진심으로 응원합니다!
+                        </p>
                     </div>
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <Button size="lg" className="flex-1 md:flex-none bg-white text-blue-600 hover:bg-blue-50 font-bold px-8 rounded-2xl">
-                            <Mail className="w-5 h-5 mr-2" /> 이메일로 받기
+                    <Link href="/">
+                        <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-10 rounded-2xl">
+                            완료하고 홈으로 가기
                         </Button>
-                    </div>
+                    </Link>
                 </section>
             </main>
 

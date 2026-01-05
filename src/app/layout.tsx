@@ -15,7 +15,9 @@ export default function RootLayout({
     <html lang="ko">
       <head>
         <link rel="stylesheet" as="style" crossOrigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+        <script src="https://js.stripe.com/v3/" async></script>
       </head>
+
       <body className="antialiased text-foreground bg-background">
         {children}
       </body>

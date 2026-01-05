@@ -14,10 +14,12 @@ interface InterviewState extends InterviewData {
     setProjects: (projects: ProjectEntry[]) => void;
     updateDeepDiveAnswer: (answer: DeepDiveAnswer) => void;
     updateTone: (tone: Partial<InterviewData['tone']>) => void;
-    updateGeneratedDrafts: (drafts: string[]) => void; // Added this action
+    updateGeneratedDrafts: (drafts: string[]) => void;
+    updateDraftAtIndex: (index: number, draft: string) => void;
 
     reset: () => void;
 }
+
 
 const initialState: InterviewData = {
     basicInfo: {
@@ -73,6 +75,13 @@ export const useInterviewStore = create<InterviewState>()(
                 })),
 
             updateGeneratedDrafts: (drafts) => set({ generatedDrafts: drafts }),
+
+            updateDraftAtIndex: (index, draft) =>
+                set((state) => {
+                    const newDrafts = [...(state.generatedDrafts || [])];
+                    newDrafts[index] = draft;
+                    return { generatedDrafts: newDrafts };
+                }),
 
             reset: () => set({ ...initialState, currentStepIndex: 0 }),
         }),
