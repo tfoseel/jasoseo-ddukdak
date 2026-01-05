@@ -13,41 +13,61 @@ import {
     Sparkles,
     CheckCircle2,
     ChevronRight,
-    Loader2
+    Loader2,
+    AlertCircle
 } from "lucide-react";
+
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function SuccessPage() {
-    const { basicInfo, projects, tone, generatedDrafts, updateGeneratedDrafts } = useInterviewStore();
+    const { basicInfo, projects, deepDiveAnswers, tone, generatedDrafts, updateGeneratedDrafts } = useInterviewStore();
     const [isGenerating, setIsGenerating] = useState(generatedDrafts?.length === 0);
+    const [error, setError] = useState<string | null>(null);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (isGenerating) {
-            // Mock generation delay
-            const timer = setTimeout(() => {
-                const mockDrafts = basicInfo.questions.map((q, idx) => {
-                    const project = projects[idx % projects.length];
-                    return `저는 ${project?.name} 프로젝트 당시 ${project?.type === "실무" ? "실무자" : "팀원"}로서 ${idx % 2 === 0 ? "기술적 완성도" : "사용자 경험"}를 최우선으로 고려했습니다. 특히 ${idx % 3 === 0 ? "부족한 리소스" : "촉박한 마감 기한"}이라는 제약 사항 속에서도 포기하지 않고 성과를 냈습니다. 
+            const generate = async () => {
+                try {
+                    setError(null);
+                    const response = await fetch("/api/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ basicInfo, projects, deepDiveAnswers, tone }),
+                    });
 
-이 과정에서 가장 중요하게 배운 것은 ${idx % 2 === 0 ? "데이터에 기반한 의사결정" : "동료와의 원활한 소통"}의 중요성이었습니다. 비록 초기에는 아쉬운 점도 있었지만, 이를 보완하기 위해 직접 발로 뛰며 문제를 해결하려 노력했습니다. 
+                    const data = await response.json();
 
-${basicInfo.company}의 ${basicInfo.role}로서 이러한 저의 ${tone.selectedTone === "Logical" ? "논리적 분석력" : "열정적인 태도"}를 바탕으로 팀의 성장에 기여하고 싶습니다.`;
-                });
-                updateGeneratedDrafts(mockDrafts);
-                setIsGenerating(false);
-            }, 3500);
-            return () => clearTimeout(timer);
+                    if (data.drafts) {
+                        updateGeneratedDrafts(data.drafts);
+                    } else if (data.error) {
+                        setError(data.error);
+                    }
+                } catch (err: any) {
+                    console.error("Generation failed:", err);
+                    setError("생성 도중 오류가 발생했습니다. 다시 시도해주세요.");
+                } finally {
+                    setIsGenerating(false);
+                }
+            };
+
+            generate();
         }
-    }, [isGenerating, basicInfo, projects, tone, updateGeneratedDrafts]);
+    }, [isGenerating, basicInfo, projects, deepDiveAnswers, tone, updateGeneratedDrafts]);
+
+    const handleRegenerate = () => {
+        updateGeneratedDrafts([]);
+        setIsGenerating(true);
+    };
 
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text);
         setCopiedIndex(index);
         setTimeout(() => setCopiedIndex(null), 2000);
     };
+
 
     if (isGenerating) {
         return (
@@ -113,6 +133,13 @@ ${basicInfo.company}의 ${basicInfo.role}로서 이러한 저의 ${tone.selected
                         선택하신 '{tone.selectedTone}' 톤으로 {generatedDrafts?.length}개의 맞춤 답변이 생성되었습니다.<br />
                         이 초안은 참고용이며, 본인의 언어로 조금만 다듬으면 완벽한 자소서가 됩니다!
                     </p>
+
+                    {error && (
+                        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4" /> {error}
+                            <button onClick={handleRegenerate} className="underline ml-auto">다시 시도</button>
+                        </div>
+                    )}
                 </section>
 
                 <section className="grid gap-8">
@@ -156,7 +183,10 @@ ${basicInfo.company}의 ${basicInfo.role}로서 이러한 저의 ${tone.selected
                                             TONE: <span className="text-gray-700">{tone.selectedTone}</span>
                                         </div>
                                     </div>
-                                    <button className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline">
+                                    <button
+                                        onClick={handleRegenerate}
+                                        className="text-xs font-bold text-blue-600 flex items-center gap-1 hover:underline"
+                                    >
                                         다른 버전으로 다시 생성 <RefreshCcw className="w-3 h-3" />
                                     </button>
                                 </div>
@@ -168,6 +198,7 @@ ${basicInfo.company}의 ${basicInfo.role}로서 이러한 저의 ${tone.selected
                         </motion.div>
                     ))}
                 </section>
+
 
                 <section className="bg-blue-600 rounded-[40px] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="space-y-2 text-center md:text-left">
