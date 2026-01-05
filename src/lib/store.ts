@@ -14,6 +14,7 @@ interface InterviewState extends InterviewData {
     setProjects: (projects: ProjectEntry[]) => void;
     updateDeepDiveAnswer: (answer: DeepDiveAnswer) => void;
     updateTone: (tone: Partial<InterviewData['tone']>) => void;
+    updateGeneratedDrafts: (drafts: string[]) => void; // Added this action
 
     reset: () => void;
 }
@@ -21,6 +22,8 @@ interface InterviewState extends InterviewData {
 const initialState: InterviewData = {
     basicInfo: {
         company: '',
+        department: '',
+        team: '',
         role: '',
         email: '',
         questions: [''],
@@ -32,6 +35,7 @@ const initialState: InterviewData = {
         usagePurpose: 'Edit slightly',
         bannedWords: [],
     },
+    generatedDrafts: [],
 };
 
 export const useInterviewStore = create<InterviewState>()(
@@ -67,6 +71,8 @@ export const useInterviewStore = create<InterviewState>()(
                 set((state) => ({
                     tone: { ...state.tone, ...tone },
                 })),
+
+            updateGeneratedDrafts: (drafts) => set({ generatedDrafts: drafts }),
 
             reset: () => set({ ...initialState, currentStepIndex: 0 }),
         }),

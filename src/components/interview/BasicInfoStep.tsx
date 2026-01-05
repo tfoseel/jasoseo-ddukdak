@@ -25,8 +25,8 @@ export function BasicInfoStep() {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2 lg:col-span-2">
                     <label className="text-sm font-semibold text-gray-700">지원 회사명</label>
                     <input
                         type="text"
@@ -36,8 +36,28 @@ export function BasicInfoStep() {
                         className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                     />
                 </div>
-                <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">지원 직무</label>
+                <div className="space-y-2 lg:col-span-2">
+                    <label className="text-sm font-semibold text-gray-700">지원 부서 (선택)</label>
+                    <input
+                        type="text"
+                        value={basicInfo.department}
+                        onChange={(e) => updateBasicInfo({ department: e.target.value })}
+                        placeholder="예: 클라우드 사업부"
+                        className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    />
+                </div>
+                <div className="space-y-2 lg:col-span-2">
+                    <label className="text-sm font-semibold text-gray-700">소속 팀 (선택)</label>
+                    <input
+                        type="text"
+                        value={basicInfo.team}
+                        onChange={(e) => updateBasicInfo({ team: e.target.value })}
+                        placeholder="예: 플랫폼 서비스팀"
+                        className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    />
+                </div>
+                <div className="space-y-2 lg:col-span-2">
+                    <label className="text-sm font-semibold text-gray-700">지원 직무 / 직책</label>
                     <input
                         type="text"
                         value={basicInfo.role}
