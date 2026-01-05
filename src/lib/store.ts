@@ -28,17 +28,19 @@ const initialState: InterviewData = {
         team: '',
         role: '',
         email: '',
-        questions: [''],
+        questions: [{ content: '', maxChars: 500 }],
     },
     projects: [],
     deepDiveAnswers: [],
     tone: {
-        selectedTone: 'Confident & Professional',
-        usagePurpose: 'Edit slightly',
+        selectedTone: '차분하고 논리적인',
+        usagePurpose: '직접 일부 수정',
         bannedWords: [],
+        includeSubtitles: true,
     },
     generatedDrafts: [],
 };
+
 
 export const useInterviewStore = create<InterviewState>()(
     persist(

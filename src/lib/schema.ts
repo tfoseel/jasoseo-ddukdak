@@ -44,7 +44,7 @@ export interface InterviewData {
         team: string;
         role: string;
         email?: string;
-        questions: string[];
+        questions: { content: string; maxChars: number }[];
     };
     projects: ProjectEntry[];
     deepDiveAnswers: DeepDiveAnswer[];
@@ -52,6 +52,7 @@ export interface InterviewData {
         selectedTone: string;
         usagePurpose: string;
         bannedWords: string[];
+        includeSubtitles: boolean;
     };
     generatedDrafts?: string[];
 }

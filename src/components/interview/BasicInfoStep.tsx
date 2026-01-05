@@ -7,14 +7,20 @@ import { Plus, Trash2 } from "lucide-react";
 export function BasicInfoStep() {
     const { basicInfo, updateBasicInfo } = useInterviewStore();
 
-    const handleQuestionChange = (index: number, value: string) => {
+    const handleQuestionChange = (index: number, content: string) => {
         const newQuestions = [...basicInfo.questions];
-        newQuestions[index] = value;
+        newQuestions[index] = { ...newQuestions[index], content };
+        updateBasicInfo({ questions: newQuestions });
+    };
+
+    const handleMaxCharsChange = (index: number, maxChars: number) => {
+        const newQuestions = [...basicInfo.questions];
+        newQuestions[index] = { ...newQuestions[index], maxChars };
         updateBasicInfo({ questions: newQuestions });
     };
 
     const addQuestion = () => {
-        updateBasicInfo({ questions: [...basicInfo.questions, ""] });
+        updateBasicInfo({ questions: [...basicInfo.questions, { content: "", maxChars: 500 }] });
     };
 
     const removeQuestion = (index: number) => {
@@ -80,11 +86,21 @@ export function BasicInfoStep() {
                             <div className="flex-1 relative">
                                 <span className="absolute left-4 top-4 text-xs font-bold text-gray-300">Q{index + 1}</span>
                                 <textarea
-                                    value={q}
+                                    value={q.content}
                                     onChange={(e) => handleQuestionChange(index, e.target.value)}
                                     placeholder="자기소개서 문항을 그대로 붙여넣어 주세요."
-                                    className="w-full min-h-[80px] pt-10 pb-4 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
+                                    className="w-full min-h-[100px] pt-10 pb-4 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
                                 />
+                                <div className="absolute right-4 top-3 flex items-center gap-2">
+                                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">글자 수 제한</label>
+                                    <input
+                                        type="number"
+                                        value={q.maxChars}
+                                        onChange={(e) => handleMaxCharsChange(index, parseInt(e.target.value) || 0)}
+                                        className="w-16 h-7 bg-gray-50 border border-gray-100 rounded-lg text-[11px] font-bold text-center focus:border-primary outline-none"
+                                        placeholder="500"
+                                    />
+                                </div>
                             </div>
                             {basicInfo.questions.length > 1 && (
                                 <Button

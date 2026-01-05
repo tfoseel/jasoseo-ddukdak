@@ -3,6 +3,8 @@
 import { useInterviewStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Check, Info } from "lucide-react";
+import { motion } from "framer-motion";
+
 
 const TONES = [
     { id: "logical", label: "차분하고 논리적인", desc: "분석적이고 신뢰감 있는 느낌" },
@@ -106,6 +108,29 @@ export function ToneStep() {
                 </div>
             </section>
 
+            {/* Subtitle Toggle */}
+            <section className="space-y-4">
+                <div className="flex justify-between items-center bg-gray-50/50 p-5 rounded-3xl border border-gray-100">
+                    <div>
+                        <h4 className="text-base font-bold text-gray-900">소제목 포함 여부</h4>
+                        <p className="text-xs text-gray-400 mt-0.5">문항마다 핵심을 담은 소제목을 붙여줍니다.</p>
+                    </div>
+                    <button
+                        onClick={() => updateTone({ includeSubtitles: !tone.includeSubtitles })}
+                        className={cn(
+                            "w-14 h-8 rounded-full transition-all relative p-1",
+                            tone.includeSubtitles ? "bg-primary" : "bg-gray-200"
+                        )}
+                    >
+                        <motion.div
+                            className="w-6 h-6 bg-white rounded-full shadow-sm"
+                            animate={{ x: tone.includeSubtitles ? 24 : 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                    </button>
+                </div>
+            </section>
+
             {/* Final Notice */}
             <div className="bg-gray-50 p-6 rounded-3xl space-y-3">
                 <p className="text-xs text-gray-500 leading-relaxed font-medium">
@@ -113,6 +138,7 @@ export function ToneStep() {
                     결제 완료 직후 문항별 초안을 바로 확인하실 수 있으며, 작성 파일은 24시간 동안 보관된 후 폐기됩니다.
                 </p>
             </div>
+
         </div>
     );
 }

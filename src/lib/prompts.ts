@@ -45,14 +45,22 @@ export function generateUserPrompt(data: InterviewData, questionIndex: number): 
     }).join("\n");
 
     const bannedWordsContext = tone.bannedWords.length > 0
-        ? `\n[절대 금지 단어 리스트: 다음 단어들은 절대 사용하지 마세요]\n${tone.bannedWords.join(", ")}`
+        ? `\n[절대 금지 단어 리스트: 다음 단어들은 절대 사용하지 마하세요]\n${tone.bannedWords.join(", ")}`
+        : "";
+
+    const subtitleInstruction = tone.includeSubtitles
+        ? '가독성을 위해 내용의 핵심을 관통하는 창의적인 소제목(예: [소제목])을 반드시 붙여주세요.'
+        : '소제목을 절대 붙이지 마세요. 본문으로만 작성하십시오.';
+
+    const lengthInstruction = targetQuestion.maxChars
+        ? `이 문항의 글자 수 제한은 공백 포함 ${targetQuestion.maxChars}자입니다. 반드시 ${Math.floor(targetQuestion.maxChars * 0.9)}자 ~ ${targetQuestion.maxChars}자 사이로 작성하십시오. 분량을 채우기 위해 단순히 문장을 늘리지 말고, 경험의 디테일과 당신의 생각, 인사이트를 풍부하게 서술하여 깊이감을 더하십시오. 90% 미만으로 작성할 시 실패로 간주합니다.`
         : "";
 
     return `
 사용자의 기본 정보: ${basicInfo.company} / ${basicInfo.department} / ${basicInfo.team} / ${basicInfo.role} 지원
 
 [작성할 문항]
-${questionIndex + 1}. ${targetQuestion}
+${questionIndex + 1}. ${targetQuestion.content}
 
 [활용할 경험 소스]
 ${projectContext}
@@ -60,13 +68,18 @@ ${projectContext}
 [제약 조건]
 - 톤: ${tone.selectedTone}
 - 작성 목적: ${tone.usagePurpose}
+${lengthInstruction}
+${subtitleInstruction}
 ${bannedWordsContext}
 
-위 정보를 바탕으로 해당 문항에 대한 초안을 작성해주세요. 
-가독성을 위해 적절한 소제목(예: [소제목])을 반드시 붙여주세요.
-반드시 **존댓말**로 작성해야 하며, AI가 쓴 것 같은 느낌을 최대한 배제해주세요.
+[작성 가이드]
+1. 경험의 단순 요약은 절대 금지합니다. 인터뷰에 기재된 구체적인 상황과 당신의 행동(Action)을 생생하게 묘사하여 마치 독자가 현장에 있는 것처럼 느끼게 하십시오.
+2. '문제 -> 해결 -> 결과'의 뻔한 나열 대신, 당시의 고민과 결정의 근거를 매력적으로 서술하십시오.
+3. 각 문장은 인과관계가 명확해야 하며, 경험에서 배운 점이 지원한 직무에 어떻게 기여할지 논리적으로 연결하십시오.
+4. 반드시 **존댓말**로 작성해야 하며, AI 특유의 '정답만 말하는 것 같은' 말투를 최대한 배제하고 인간적인 문장력을 발휘하십시오.
 `;
 }
+
 
 
 

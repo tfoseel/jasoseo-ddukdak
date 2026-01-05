@@ -9,7 +9,8 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { basicInfo, projects, deepDiveAnswers, tone, questionIndex } = body;
+        const { data, questionIndex } = body;
+        const { basicInfo, projects, deepDiveAnswers, tone } = data;
 
         if (questionIndex === undefined) {
             return NextResponse.json({ error: "questionIndex is required" }, { status: 400 });

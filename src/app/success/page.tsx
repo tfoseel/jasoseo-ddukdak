@@ -171,9 +171,9 @@ export default function SuccessPage() {
                                 <div className="flex items-start justify-between">
                                     <div className="space-y-1">
                                         <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md">QUESTION {idx + 1}</span>
-                                        <h2 className="text-lg font-bold text-gray-900 mt-2">{basicInfo.questions[idx]}</h2>
+                                        <h2 className="text-lg font-bold text-gray-900 mt-2">{basicInfo.questions[idx].content}</h2>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col items-end gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -186,9 +186,23 @@ export default function SuccessPage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-50 leading-relaxed text-gray-700 whitespace-pre-wrap text-sm font-medium">
-                                    {draft}
+                                <div className="space-y-2">
+                                    <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-50 leading-relaxed text-gray-700 whitespace-pre-wrap text-sm font-medium">
+                                        {draft}
+                                    </div>
+                                    <div className="flex justify-end pr-2">
+                                        <div className="text-[10px] font-bold text-gray-400">
+                                            LENGTH: <span className={cn(
+                                                draft.length >= (basicInfo.questions[idx].maxChars * 0.9) ? "text-green-600" : "text-amber-500"
+                                            )}>
+                                                {draft.length.toLocaleString()}자
+                                            </span>
+                                            <span className="opacity-50 mx-1">/</span>
+                                            {basicInfo.questions[idx].maxChars.toLocaleString()}자
+                                        </div>
+                                    </div>
                                 </div>
+
 
                                 <div className="flex items-center justify-between pt-4">
                                     <div className="flex gap-4">
