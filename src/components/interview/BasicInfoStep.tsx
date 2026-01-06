@@ -95,8 +95,13 @@ export function BasicInfoStep() {
                                     <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">글자 수 제한</label>
                                     <input
                                         type="number"
-                                        value={q.maxChars}
-                                        onChange={(e) => handleMaxCharsChange(index, parseInt(e.target.value) || 0)}
+                                        step="100"
+                                        min="0"
+                                        value={q.maxChars.toString()}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value, 10);
+                                            handleMaxCharsChange(index, isNaN(val) ? 0 : val);
+                                        }}
                                         className="w-16 h-7 bg-gray-50 border border-gray-100 rounded-lg text-[11px] font-bold text-center focus:border-primary outline-none"
                                         placeholder="500"
                                     />
