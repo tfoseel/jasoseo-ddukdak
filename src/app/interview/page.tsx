@@ -4,22 +4,75 @@ import { useInterviewStore } from "@/lib/store";
 import { INTERVIEW_STEPS } from "@/lib/schema";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronRight, RotateCcw } from "lucide-react";
+
 import Link from "next/link";
 import { BasicInfoStep } from "@/components/interview/BasicInfoStep";
 import { ProjectSelectionStep } from "@/components/interview/ProjectSelectionStep";
 import { DeepDiveStep } from "@/components/interview/DeepDiveStep";
 import { ToneStep } from "@/components/interview/ToneStep";
+import { ValueStep } from "@/components/interview/ValueStep";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function InterviewPage() {
-    const { currentStepIndex, prevStep, nextStep } = useInterviewStore();
+    const {
+        currentStepIndex,
+        prevStep,
+        nextStep,
+        basicInfo,
+        userProfile,
+        projects,
+        deepDiveAnswers,
+        tone
+    } = useInterviewStore();
     const currentStep = INTERVIEW_STEPS[currentStepIndex];
+
+    const validateStep = () => {
+        switch (currentStep.id) {
+            case "basic":
+                return (
+                    basicInfo.company.trim() !== "" &&
+                    basicInfo.role.trim() !== "" &&
+                    basicInfo.questions.length > 0 &&
+                    basicInfo.questions.every(q => q.content.trim() !== "")
+                );
+            case "value":
+                return (
+                    userProfile.strengths.length > 0 &&
+                    userProfile.weakness.trim() !== "" &&
+                    userProfile.vision.trim() !== "" &&
+                    userProfile.coreValue.trim() !== ""
+                );
+            case "projects":
+                return projects.length > 0;
+            case "deep_dive":
+                // Check if every selected project has basic deep dive answers
+                if (projects.length === 0) return false;
+                return projects.every(proj => {
+                    const answer = deepDiveAnswers.find(a => a.projectId === proj.id);
+                    if (!answer) return false;
+                    // Check essential fields - just non-empty
+                    return (
+                        answer.problem.trim() !== "" &&
+                        answer.actionReal.trim() !== "" &&
+                        answer.result.trim() !== ""
+                    );
+                });
+            case "tone":
+                return tone.selectedTone !== "";
+            default:
+                return true;
+        }
+    };
+
+    const isStepValid = validateStep();
 
     const renderStep = () => {
         switch (currentStep.id) {
             case "basic":
                 return <BasicInfoStep />;
+            case "value":
+                return <ValueStep />;
             case "projects":
                 return <ProjectSelectionStep />;
             case "deep_dive":
@@ -39,8 +92,22 @@ export default function InterviewPage() {
                     <Link href="/">
                         <Logo />
                     </Link>
-                    <div className="text-sm font-medium text-gray-400">
-                        {currentStepIndex + 1} / {INTERVIEW_STEPS.length}
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => {
+                                if (confirm("정말 모든 데이터를 초기화하시겠습니까? 작성 중인 내용이 모두 삭제됩니다.")) {
+                                    useInterviewStore.getState().reset();
+                                    window.location.href = "/";
+                                }
+                            }}
+                            className="flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            전체 초기화
+                        </button>
+                        <div className="text-sm font-medium text-gray-400">
+                            {currentStepIndex + 1} / {INTERVIEW_STEPS.length}
+                        </div>
                     </div>
                 </div>
                 {/* Progress Bar */}
@@ -91,43 +158,22 @@ export default function InterviewPage() {
                     </Button>
 
                     {currentStepIndex < INTERVIEW_STEPS.length - 1 ? (
-                        <Button onClick={nextStep} className="px-8 rounded-full">
+                        <Button
+                            onClick={nextStep}
+                            disabled={!isStepValid}
+                            className="px-8 rounded-full"
+                        >
                             다음 단계로 <ChevronRight className="ml-2 w-4 h-4" />
                         </Button>
                     ) : (
-                        <Button
-                            onClick={async () => {
-                                try {
-                                    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-                                    if (!publishableKey) {
-                                        alert("Stripe Publishable Key가 설정되지 않았습니다. .env.local을 확인해주세요.");
-                                        return;
-                                    }
-
-                                    const res = await fetch("/api/checkout", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({ items: [] }),
-                                    });
-                                    const data = await res.json();
-
-                                    if (data.error) {
-                                        alert(data.error);
-                                        return;
-                                    }
-
-                                    const stripe = (window as any).Stripe(publishableKey);
-                                    await stripe.redirectToCheckout({ sessionId: data.sessionId });
-                                } catch (err) {
-                                    console.error("Checkout failed:", err);
-                                    alert("결제 페이지로 이동하는 중 오류가 발생했습니다.");
-                                }
-                            }}
-                            className="px-8 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200"
-                        >
-                            인터뷰 완료 및 초안 결제하기
-                        </Button>
-
+                        <Link href={isStepValid ? "/preview" : "#"} onClick={(e) => !isStepValid && e.preventDefault()}>
+                            <Button
+                                disabled={!isStepValid}
+                                className="px-8 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 disabled:opacity-50 disabled:shadow-none"
+                            >
+                                인터뷰 분석 및 미리보기 <ChevronRight className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
                     )}
 
                 </div>
@@ -139,6 +185,7 @@ export default function InterviewPage() {
 function getStepTitle(stepId: string) {
     switch (stepId) {
         case "basic": return "지원하시는 기업과 문항을 알려주세요.";
+        case "value": return "어떤 가치관을 가진 분인지 궁금해요.";
         case "projects": return "자소서에 쓸 경험(프로젝트)을 나열해 볼까요?";
         case "deep_dive": return "각 경험을 구체적으로 회고해 봅시다.";
         case "tone": return "어떤 느낌의 글을 원하시나요?";

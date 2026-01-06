@@ -154,11 +154,12 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="w-full py-12 text-center text-xs text-gray-400 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="flex flex-col items-center justify-center gap-2 mb-4">
+        <div className="max-w-5xl mx-auto px-6 space-y-2">
+          <div className="flex flex-col items-center justify-center gap-2 mb-2">
             <Logo />
             <p className="font-semibold text-gray-900">자소서 뚝딱</p>
           </div>
+          <p>문의: smilelee9@naver.com</p>
           <p>© 2026 Leesoft. All rights reserved.</p>
         </div>
       </footer>

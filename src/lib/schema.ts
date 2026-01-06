@@ -37,6 +37,13 @@ export interface DeepDiveAnswer {
 }
 
 
+export interface UserProfile {
+    strengths: string[];
+    weakness: string;
+    vision: string;
+    coreValue: string;
+}
+
 export interface InterviewData {
     basicInfo: {
         company: string;
@@ -46,6 +53,7 @@ export interface InterviewData {
         email?: string;
         questions: { content: string; maxChars: number }[];
     };
+    userProfile: UserProfile;
     projects: ProjectEntry[];
     deepDiveAnswers: DeepDiveAnswer[];
     tone: {
@@ -54,12 +62,15 @@ export interface InterviewData {
         bannedWords: string[];
         includeSubtitles: boolean;
     };
+    strategy?: { questionIndex: number; projectIds: string[]; reasoning: string }[];
     generatedDrafts?: string[];
 }
 
 
+
 export const INTERVIEW_STEPS = [
     { id: "basic", title: "기본 정보" },
+    { id: "value", title: "가치관" },
     { id: "projects", title: "경험 선택" },
     { id: "deep_dive", title: "상세 인터뷰" },
     { id: "tone", title: "마무리" }

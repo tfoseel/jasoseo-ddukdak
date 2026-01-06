@@ -6,9 +6,51 @@ import { Logo } from "@/components/ui/Logo";
 import { ArrowLeft, CreditCard, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PreviewPage() {
-    const { basicInfo, projects } = useInterviewStore();
+    const { basicInfo, projects, deepDiveAnswers, userProfile, tone, strategy, setStrategy, reset } = useInterviewStore();
+    const [isAnalyzing, setIsAnalyzing] = useState(true);
+    const router = useRouter();
+
+    // 결제 전 데이터 백업 및 전략 수립
+    useEffect(() => {
+        const initializePreview = async () => {
+            try {
+                // 1. Safety Backup
+                await fetch("/api/safety-log", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: basicInfo.email,
+                        data: { basicInfo, projects, deepDiveAnswers, userProfile, tone, strategy }
+                    })
+                });
+
+                // 2. Fetch AI Strategy (Real-time analysis)
+                if (!strategy || strategy.length === 0) {
+                    const stratRes = await fetch("/api/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            data: { basicInfo, projects, deepDiveAnswers, tone, userProfile },
+                            mode: "STRATEGIZE"
+                        }),
+                    });
+                    const stratResult = await stratRes.json();
+                    if (stratResult.strategy) {
+                        setStrategy(stratResult.strategy);
+                    }
+                }
+            } catch (err) {
+                console.error("Initialization failed", err);
+            } finally {
+                setIsAnalyzing(false);
+            }
+        };
+        initializePreview();
+    }, []);
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -30,11 +72,13 @@ export default function PreviewPage() {
                         <Sparkles className="w-8 h-8 fill-blue-600/20" />
                     </div>
                     <h1 className="text-3xl font-extrabold text-gray-900 break-keep">
-                        인터뷰 데이터를 기반으로<br />
-                        고품질 초안 생성이 가능합니다.
+                        {isAnalyzing ? "인터뷰 내용을 분석 중입니다..." : "인터뷰 분석이 완료되었습니다."}
                     </h1>
-                    <p className="text-gray-500 font-medium">
-                        입력해주신 {projects.length}개의 경험을 바탕으로 {basicInfo.questions.length}개 문항에 최적화된 답변을 작성합니다.
+                    <p className="text-gray-500 font-medium break-keep">
+                        {isAnalyzing
+                            ? "Claude AI가 가장 임팩트 있는 경험을 각 문항에 배치하고 있습니다."
+                            : `입력해주신 ${projects.length}개의 경험을 토대로 ${basicInfo.questions.length}개 문항에 최적화된 고품질 초안 생성이 가능합니다.`
+                        }
                     </p>
                 </section>
 
@@ -42,79 +86,101 @@ export default function PreviewPage() {
                 <section className="space-y-6">
                     <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">초안 미리보기</h2>
                     <div className="space-y-4">
-                        {basicInfo.questions.map((q, idx) => (
-                            <div key={idx} className="p-6 rounded-3xl bg-white border border-gray-100 shadow-sm space-y-4 overflow-hidden relative">
-                                <div className="space-y-1">
-                                    <span className="text-[10px] font-bold text-blue-500 uppercase">Question {idx + 1}</span>
-                                    <h3 className="text-sm font-bold text-gray-900 line-clamp-1">{q || "입력된 문항이 없습니다."}</h3>
-                                </div>
+                        {basicInfo.questions.map((q, idx) => {
+                            const targetStrategy = strategy?.find(s => s.questionIndex === idx);
+                            const assignedProjects = projects.filter(p => targetStrategy?.projectIds.includes(p.id));
 
-                                {/* Blurred Content */}
-                                <div className="relative group">
-                                    <div className="space-y-2 blur-[6px] select-none opacity-40">
-                                        <div className="h-4 bg-gray-200 rounded-full w-[95%]" />
-                                        <div className="h-4 bg-gray-200 rounded-full w-[80%]" />
-                                        <div className="h-4 bg-gray-200 rounded-full w-[90%]" />
-                                        <div className="h-4 bg-gray-100 rounded-full w-[40%]" />
+                            return (
+                                <div key={idx} className="p-6 rounded-3xl bg-white border border-gray-100 shadow-sm space-y-4 overflow-hidden relative">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-bold text-blue-500 uppercase">Question {idx + 1}</span>
+                                            {isAnalyzing && (
+                                                <div className="flex gap-1">
+                                                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" />
+                                                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                                    <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <h3 className="text-sm font-bold text-gray-900 line-clamp-1">{q.content || "입력된 문항이 없습니다."}</h3>
                                     </div>
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-gray-100 shadow-xl flex items-center gap-2">
-                                            <Lock className="w-3 h-3 text-blue-600" />
-                                            <span className="text-xs font-bold text-gray-900">결제 후 즉시 공개</span>
+
+                                    {/* Blurred Content */}
+                                    <div className="relative group">
+                                        <div className="space-y-2 blur-[6px] select-none opacity-40">
+                                            <div className="h-4 bg-gray-200 rounded-full w-[95%]" />
+                                            <div className="h-4 bg-gray-200 rounded-full w-[80%]" />
+                                            <div className="h-4 bg-gray-200 rounded-full w-[40%]" />
+                                        </div>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl border border-gray-100 shadow-xl flex items-center gap-2">
+                                                <Lock className="w-3 h-3 text-blue-600" />
+                                                <span className="text-xs font-bold text-gray-900">결제 후 즉시 공개</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Key Sentence Teaser (Rule based mock) */}
-                                <div className="pt-4 border-t border-dashed border-gray-100 italic text-xs text-blue-600 font-medium break-keep">
-                                    "이 답변에서는 {projects[idx % projects.length]?.name || "경험"}에서 겪은 {idx % 2 === 0 ? "기술적 해결 능력" : "위기 대처 방식"}을 중심으로 성과를 강조할 예정입니다."
+                                    {/* Key Sentence Teaser (Now uses real AI Strategy) */}
+                                    <div className="pt-4 border-t border-dashed border-gray-100 italic text-xs text-blue-600 font-medium break-keep min-h-[40px]">
+                                        {isAnalyzing ? (
+                                            <div className="h-4 bg-blue-50 animate-pulse rounded w-3/4" />
+                                        ) : (
+                                            <>
+                                                "이 문항에는 <strong>{assignedProjects.map(p => p.name).join(", ")}</strong> 경험의 {targetStrategy?.reasoning || "내용이 적절히 배치될 예정입니다."}"
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 
                 {/* Pricing Card */}
-                <div className="p-8 rounded-[40px] bg-gray-900 text-white shadow-2xl space-y-6 relative overflow-hidden">
+                <div className="p-8 rounded-[40px] bg-gray-900 text-white shadow-2xl space-y-8 relative overflow-hidden text-center">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600 rounded-full blur-[80px] opacity-50" />
-                    <div className="relative z-10 space-y-6">
-                        <div className="space-y-2">
-                            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest">Special Price</span>
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-4xl font-black">3,900원</h3>
-                                <span className="text-gray-400 line-through text-sm">9,900원</span>
+                    <div className="relative z-10 space-y-8">
+                        <div className="space-y-3">
+                            <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/30">Special Launch Price</span>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-5xl font-black text-white">2,900원</h3>
+                                    <span className="text-gray-500 line-through text-lg">5,900원</span>
+                                </div>
+                                <p className="text-gray-400 text-sm font-medium">단 한 번의 커피 가격으로 합격에 가까워지세요.</p>
                             </div>
-                            <p className="text-sm text-gray-300 break-keep">
-                                커피 한 잔 가격으로 10시간의 자소서 고민을 끝내세요. <br />
-                                <strong>사람 냄새 나는 솔직한 초안</strong>이 여러분을 기다립니다.
+                        </div>
+
+                        <div className="grid gap-3">
+                            <Link href="/success">
+                                <Button size="lg" className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-500 text-lg font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">
+                                    커피 한 잔 값으로 초안 보기 <Sparkles className="ml-2 w-5 h-5 fill-white" />
+                                </Button>
+                            </Link>
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => {
+                                    if (confirm("정말로 종료하시겠습니까? 작성하신 모든 데이터가 안전하게 삭제됩니다.")) {
+                                        reset();
+                                        router.push("/");
+                                    }
+                                }}
+                                className="w-full h-14 rounded-2xl border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white font-bold text-sm"
+                            >
+                                결제하지 않고 종료하기
+                            </Button>
+                            <p className="text-[10px] text-gray-500 font-medium">
+                                * 종료 시 현재까지 입력된 모든 인터뷰 데이터는 보안을 위해 즉시 파기됩니다.
                             </p>
                         </div>
-
-                        <div className="space-y-3 pt-2">
-                            <div className="flex items-center gap-3 text-xs font-medium text-gray-300">
-                                <CheckCircle className="w-4 h-4 text-blue-500" /> 문항별 맞춤형 초안 3~5개 생성
-                            </div>
-                            <div className="flex items-center gap-3 text-xs font-medium text-gray-300">
-                                <CheckCircle className="w-4 h-4 text-blue-500" /> 1회 결제 시 24시간 무제한 확인
-                            </div>
-                            <div className="flex items-center gap-3 text-xs font-medium text-gray-300">
-                                <CheckCircle className="w-4 h-4 text-blue-500" /> 이메일/텍스트 다운로드 제공
-                            </div>
-                        </div>
-
-                        <Link href="/success">
-                            <Button size="lg" className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-500 text-lg font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">
-                                <CreditCard className="w-5 h-5 mr-2" /> 지금 바로 초안 받기
-                            </Button>
-                        </Link>
-                        <p className="text-center text-[10px] text-gray-500">
-                            * 현재는 UX 테스트 중으로 클릭 시 바로 성공 페이지로 이동합니다.
-                        </p>
                     </div>
                 </div>
             </main>
 
-            <footer className="py-12 text-center text-[10px] text-gray-400 border-t border-gray-50">
+            <footer className="py-12 text-center text-[10px] text-gray-400 border-t border-gray-50 space-y-2">
+                <p>문의: smilelee9@naver.com</p>
                 <p>© 2026 Leesoft. All rights reserved.</p>
             </footer>
         </div>

@@ -22,25 +22,48 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function SuccessPage() {
-    const { basicInfo, projects, deepDiveAnswers, tone, generatedDrafts, updateGeneratedDrafts, updateDraftAtIndex } = useInterviewStore();
+    const { basicInfo, projects, deepDiveAnswers, tone, strategy, setStrategy, generatedDrafts, updateGeneratedDrafts, updateDraftAtIndex, userProfile, reset } = useInterviewStore();
     const [isGenerating, setIsGenerating] = useState(!generatedDrafts || generatedDrafts.length === 0);
+    const [generatingStatus, setGeneratingStatus] = useState<"STRATEGY" | "CONTENT">("STRATEGY");
     const [generatingIndex, setGeneratingIndex] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (isGenerating && basicInfo.questions.length > 0) {
-            const generateSequentially = async () => {
+            const generateFullFlow = async () => {
                 try {
                     setError(null);
 
-                    // Initialize drafts array with empty strings if not already preset
+                    let currentStrategy = strategy;
+
+                    // Step 1: Strategize (if not already done)
+                    if (!currentStrategy || currentStrategy.length === 0) {
+                        setGeneratingStatus("STRATEGY");
+                        const stratRes = await fetch("/api/generate", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                data: { basicInfo, projects, deepDiveAnswers, tone, userProfile },
+                                mode: "STRATEGIZE"
+                            }),
+                        });
+                        const stratResult = await stratRes.json();
+                        if (stratResult.strategy) {
+                            currentStrategy = stratResult.strategy;
+                            setStrategy(currentStrategy);
+                        } else {
+                            throw new Error("소재 배치 전략 수립에 실패했습니다.");
+                        }
+                    }
+
+                    // Step 2: Generate Content
+                    setGeneratingStatus("CONTENT");
                     if (!generatedDrafts || generatedDrafts.length === 0) {
                         updateGeneratedDrafts(new Array(basicInfo.questions.length).fill(""));
                     }
 
                     for (let i = 0; i < basicInfo.questions.length; i++) {
-                        // Skip if already generated (useful for partial resumes if we add that later)
                         if (generatedDrafts && generatedDrafts[i]) continue;
 
                         setGeneratingIndex(i);
@@ -49,8 +72,9 @@ export default function SuccessPage() {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                data: { basicInfo, projects, deepDiveAnswers, tone },
-                                questionIndex: i
+                                data: { basicInfo, projects, deepDiveAnswers, tone, strategy: currentStrategy, userProfile },
+                                questionIndex: i,
+                                mode: "GENERATE"
                             }),
                         });
 
@@ -70,20 +94,30 @@ export default function SuccessPage() {
                 }
             };
 
-            generateSequentially();
+            generateFullFlow();
         }
-    }, [isGenerating, basicInfo, projects, deepDiveAnswers, tone, updateGeneratedDrafts, updateDraftAtIndex]);
+    }, [isGenerating, basicInfo, projects, deepDiveAnswers, tone, strategy, setStrategy, updateGeneratedDrafts, updateDraftAtIndex, userProfile]);
 
 
     const handleRegenerate = () => {
         updateGeneratedDrafts([]);
+        setStrategy([]);
         setIsGenerating(true);
     };
+
 
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text);
         setCopiedIndex(index);
         setTimeout(() => setCopiedIndex(null), 2000);
+    };
+
+    const handleHomeClick = (e: React.MouseEvent) => {
+        if (confirm("정말로 완료하시겠습니까? 초기화 후 홈으로 이동합니다.")) {
+            reset();
+        } else {
+            e.preventDefault();
+        }
     };
 
 
@@ -102,12 +136,21 @@ export default function SuccessPage() {
                 </div>
                 <div className="space-y-3 max-w-sm">
                     <h1 className="text-2xl font-black text-gray-900 leading-tight">
-                        {generatingIndex + 1}번째 문항을<br />생성하고 있습니다
+                        {generatingStatus === "STRATEGY" ? (
+                            <>문항별 최적 소재를<br />배치하고 있습니다</>
+                        ) : (
+                            <>{generatingIndex + 1}번째 문항을<br />생성하고 있습니다</>
+                        )}
                     </h1>
                     <p className="text-gray-500 text-sm font-medium break-keep">
-                        전체 {basicInfo.questions.length}개 문항 중 {generatingIndex + 1}번째 답변을 작성 중입니다. 최적의 문장 조합을 위해 문항당 약 10~15초가 소요됩니다.
+                        {generatingStatus === "STRATEGY" ? (
+                            "전체 문항의 흐름을 분석하여 가장 임팩트 있는 경험을 매칭하는 전략 단계입니다."
+                        ) : (
+                            `전체 ${basicInfo.questions.length}개 문항 중 ${generatingIndex + 1}번째 답변을 작성 중입니다. 최적의 문장 조합을 위해 문항당 약 10~15초가 소요됩니다.`
+                        )}
                     </p>
                 </div>
+
 
                 <div className="flex gap-1.5">
                     {[0, 1, 2].map(i => (
@@ -129,7 +172,7 @@ export default function SuccessPage() {
                 <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Logo />
                     <div className="flex items-center gap-2">
-                        <Link href="/">
+                        <Link href="/" onClick={handleHomeClick}>
                             <Button size="sm" className="bg-gray-900 text-white hover:bg-gray-800 rounded-xl px-5">
                                 처음으로 돌아가기
                             </Button>
@@ -146,7 +189,7 @@ export default function SuccessPage() {
                     </div>
                     <h1 className="text-4xl font-black text-gray-900">생성된 초안을 확인해보세요.</h1>
                     <p className="text-gray-500 font-medium break-keep">
-                        선택하신 '{tone.selectedTone}' 톤으로 {generatedDrafts?.length}개의 맞춤 답변이 생성되었습니다.<br />
+                        선택하신 &apos;{tone.selectedTone}&apos; 톤으로 {generatedDrafts?.length}개의 맞춤 답변이 생성되었습니다.<br />
                         이 초안은 참고용이며, 본인의 언어로 조금만 다듬으면 완벽한 자소서가 됩니다!
                     </p>
 
@@ -238,7 +281,7 @@ export default function SuccessPage() {
                             당신의 합격을 자소서 뚝딱이 진심으로 응원합니다!
                         </p>
                     </div>
-                    <Link href="/">
+                    <Link href="/" onClick={handleHomeClick}>
                         <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-bold px-10 rounded-2xl">
                             완료하고 홈으로 가기
                         </Button>
@@ -246,7 +289,8 @@ export default function SuccessPage() {
                 </section>
             </main>
 
-            <footer className="py-12 text-center text-[10px] text-gray-400">
+            <footer className="py-12 text-center text-[10px] text-gray-400 space-y-2">
+                <p>문의: smilelee9@naver.com</p>
                 <p>© 2026 Leesoft. All rights reserved.</p>
             </footer>
         </div>

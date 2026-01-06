@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { InterviewData, ProjectEntry, DeepDiveAnswer } from './schema';
+import { InterviewData, ProjectEntry, DeepDiveAnswer, UserProfile } from './schema';
 
 interface InterviewState extends InterviewData {
     currentStepIndex: number;
@@ -11,11 +11,13 @@ interface InterviewState extends InterviewData {
     prevStep: () => void;
 
     updateBasicInfo: (info: Partial<InterviewData['basicInfo']>) => void;
+    updateUserProfile: (profile: Partial<UserProfile>) => void;
     setProjects: (projects: ProjectEntry[]) => void;
     updateDeepDiveAnswer: (answer: DeepDiveAnswer) => void;
     updateTone: (tone: Partial<InterviewData['tone']>) => void;
     updateGeneratedDrafts: (drafts: string[]) => void;
     updateDraftAtIndex: (index: number, draft: string) => void;
+    setStrategy: (strategy: InterviewData['strategy']) => void;
 
     reset: () => void;
 }
@@ -23,18 +25,29 @@ interface InterviewState extends InterviewData {
 
 const initialState: InterviewData = {
     basicInfo: {
-        company: '',
-        department: '',
-        team: '',
-        role: '',
-        email: '',
-        questions: [{ content: '', maxChars: 500 }],
+        company: "",
+        department: "",
+        team: "",
+        role: "",
+        email: "",
+        questions: [
+            {
+                content: "",
+                maxChars: 1000,
+            },
+        ],
+    },
+    userProfile: {
+        strengths: [],
+        weakness: "",
+        vision: "",
+        coreValue: "",
     },
     projects: [],
     deepDiveAnswers: [],
     tone: {
-        selectedTone: '차분하고 논리적인',
-        usagePurpose: '직접 일부 수정',
+        selectedTone: "논리적/분석적",
+        usagePurpose: "직접 일부 수정",
         bannedWords: [],
         includeSubtitles: true,
     },
@@ -55,6 +68,11 @@ export const useInterviewStore = create<InterviewState>()(
             updateBasicInfo: (info) =>
                 set((state) => ({
                     basicInfo: { ...state.basicInfo, ...info },
+                })),
+
+            updateUserProfile: (profile) =>
+                set((state) => ({
+                    userProfile: { ...state.userProfile, ...profile },
                 })),
 
             setProjects: (projects) => set({ projects }),
@@ -85,10 +103,12 @@ export const useInterviewStore = create<InterviewState>()(
                     return { generatedDrafts: newDrafts };
                 }),
 
+            setStrategy: (strategy) => set({ strategy }),
+
             reset: () => set({ ...initialState, currentStepIndex: 0 }),
         }),
         {
-            name: 'jasoseo-ddukdak-storage',
+            name: 'jasoseo-ddukdak-storage-v4',
             storage: createJSONStorage(() => localStorage),
         }
     )
