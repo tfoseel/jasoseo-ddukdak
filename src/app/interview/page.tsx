@@ -46,15 +46,13 @@ export default function InterviewPage() {
             case "projects":
                 return projects.length > 0;
             case "deep_dive":
-                // Check if every selected project has basic deep dive answers
+                // At least ONE project must have problem + result filled
                 if (projects.length === 0) return false;
-                return projects.every(proj => {
+                return projects.some(proj => {
                     const answer = deepDiveAnswers.find(a => a.projectId === proj.id);
                     if (!answer) return false;
-                    // Check essential fields - just non-empty
                     return (
                         answer.problem.trim() !== "" &&
-                        answer.actionReal.trim() !== "" &&
                         answer.result.trim() !== ""
                     );
                 });
@@ -66,6 +64,36 @@ export default function InterviewPage() {
     };
 
     const isStepValid = validateStep();
+
+    // Get hint for missing fields
+    const getMissingFieldsHint = (): string | null => {
+        if (isStepValid) return null;
+        switch (currentStep.id) {
+            case "basic":
+                const missing = [];
+                if (!basicInfo.company.trim()) missing.push("지원 회사명");
+                if (!basicInfo.role.trim()) missing.push("지원 직무");
+                if (basicInfo.questions.length === 0 || basicInfo.questions.some(q => !q.content.trim())) missing.push("자소서 문항");
+                return `다음 항목을 입력해 주세요: ${missing.join(", ")}`;
+            case "value":
+                const valueMissing = [];
+                if (userProfile.strengths.length === 0) valueMissing.push("성향 키워드");
+                if (!userProfile.weakness.trim()) valueMissing.push("약점 및 보완점");
+                if (!userProfile.vision.trim()) valueMissing.push("장기적 비전");
+                if (!userProfile.coreValue?.trim()) valueMissing.push("핵심 가치");
+                return `다음 항목을 입력해 주세요: ${valueMissing.join(", ")}`;
+            case "projects":
+                return "최소 1개 이상의 경험을 등록해 주세요.";
+            case "deep_dive":
+                return "최소 1개 경험에 '문제 상황'과 '결과'를 입력해 주세요.";
+            case "tone":
+                return "톤을 선택해 주세요.";
+            default:
+                return null;
+        }
+    };
+
+    const validationHint = getMissingFieldsHint();
 
     const renderStep = () => {
         switch (currentStep.id) {
@@ -138,6 +166,11 @@ export default function InterviewPage() {
                             <h2 className="text-2xl font-bold text-gray-900 break-keep">
                                 {getStepTitle(currentStep.id)}
                             </h2>
+                            {validationHint && (
+                                <p className="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1">
+                                    <span>⚠️</span> {validationHint}
+                                </p>
+                            )}
                         </div>
 
                         {renderStep()}

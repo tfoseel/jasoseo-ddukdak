@@ -298,9 +298,9 @@ export function DeepDiveStep() {
 
             {/* Navigation */}
             <div className="flex items-center justify-between pt-10 border-t border-gray-100 pb-10">
-                <Button variant="outline" size="sm" onClick={() => setActiveProjectIndex(Math.max(0, activeProjectIndex - 1))} disabled={activeProjectIndex === 0} className="rounded-full"><ChevronLeft className="w-4 h-4 mr-1" /> 이전 경험</Button>
+                <Button variant="outline" size="sm" onClick={() => { setActiveProjectIndex(Math.max(0, activeProjectIndex - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={activeProjectIndex === 0} className="rounded-full"><ChevronLeft className="w-4 h-4 mr-1" /> 이전 경험</Button>
                 <span className="text-xs font-bold text-gray-400">{activeProjectIndex + 1} / {projects.length}</span>
-                <Button variant="outline" size="sm" onClick={() => setActiveProjectIndex(Math.min(projects.length - 1, activeProjectIndex + 1))} disabled={activeProjectIndex === projects.length - 1} className="rounded-full">다음 경험 <ChevronRight className="w-4 h-4 ml-1" /></Button>
+                <Button variant="outline" size="sm" onClick={() => { setActiveProjectIndex(Math.min(projects.length - 1, activeProjectIndex + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={activeProjectIndex === projects.length - 1} className="rounded-full">다음 경험 <ChevronRight className="w-4 h-4 ml-1" /></Button>
             </div>
         </div>
     );

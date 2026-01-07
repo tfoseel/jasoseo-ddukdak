@@ -97,10 +97,12 @@ export function BasicInfoStep() {
                                         type="number"
                                         step="100"
                                         min="0"
+                                        max="3000"
                                         value={q.maxChars.toString()}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value, 10);
-                                            handleMaxCharsChange(index, isNaN(val) ? 0 : val);
+                                            const clamped = Math.min(3000, Math.max(0, isNaN(val) ? 0 : val));
+                                            handleMaxCharsChange(index, clamped);
                                         }}
                                         className="w-16 h-7 bg-gray-50 border border-gray-100 rounded-lg text-[11px] font-bold text-center focus:border-primary outline-none"
                                         placeholder="500"

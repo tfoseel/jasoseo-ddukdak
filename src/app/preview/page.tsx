@@ -14,6 +14,31 @@ export default function PreviewPage() {
     const [isAnalyzing, setIsAnalyzing] = useState(true);
     const router = useRouter();
 
+    // Calculate total character count and pricing
+    const totalChars = basicInfo.questions.reduce((sum, q) => sum + (q.maxChars || 0), 0);
+    const calculatePrice = () => {
+        if (totalChars <= 1500) return { price: 1900, original: 3900 };
+        if (totalChars <= 3000) return { price: 2900, original: 5900 };
+        if (totalChars <= 5000) return { price: 3900, original: 7900 };
+        return { price: 4900, original: 9900 };
+    };
+    const { price, original } = calculatePrice();
+
+    // Quality Assessment
+    const qualityScore = () => {
+        let score = 0;
+        const maxScore = projects.length * 4; // 4 key fields per project
+        deepDiveAnswers.forEach(answer => {
+            if (answer.problem?.trim().length > 20) score++;
+            if (answer.actionReal?.trim().length > 20) score++;
+            if (answer.result?.trim().length > 20) score++;
+            if (answer.learning?.trim().length > 10) score++;
+        });
+        return maxScore > 0 ? score / maxScore : 0;
+    };
+    const quality = qualityScore();
+    const showQualityWarning = quality < 0.6;
+
     // 결제 전 데이터 백업 및 전략 수립
     useEffect(() => {
         const initializePreview = async () => {
@@ -77,10 +102,30 @@ export default function PreviewPage() {
                     <p className="text-gray-500 font-medium break-keep">
                         {isAnalyzing
                             ? "Claude AI가 가장 임팩트 있는 경험을 각 문항에 배치하고 있습니다."
-                            : `입력해주신 ${projects.length}개의 경험을 토대로 ${basicInfo.questions.length}개 문항에 최적화된 고품질 초안 생성이 가능합니다.`
+                            : `입력해주신 ${projects.length}개의 경험을 토대로 ${basicInfo.questions.length}개 문항(총 ${totalChars.toLocaleString()}자)에 최적화된 초안 생성이 가능합니다.`
                         }
                     </p>
                 </section>
+
+                {/* Quality Warning */}
+                {!isAnalyzing && showQualityWarning && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-5 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                            <span className="text-amber-600 text-lg">⚠️</span>
+                        </div>
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-amber-900">경험 정보가 부족해요</h4>
+                            <p className="text-xs text-amber-700 leading-relaxed break-keep">
+                                일부 경험의 상세 내용(문제 상황, 실제 행동, 결과 등)이 충분히 작성되지 않았습니다.<br />
+                                <strong>초안 품질이 낮아질 수 있으니</strong>, 인터뷰를 더 구체적으로 작성해 보세요.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Draft Teasers */}
                 <section className="space-y-6">
@@ -145,10 +190,10 @@ export default function PreviewPage() {
                             <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/30">Special Launch Price</span>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="flex items-baseline gap-2">
-                                    <h3 className="text-5xl font-black text-white">2,900원</h3>
-                                    <span className="text-gray-500 line-through text-lg">5,900원</span>
+                                    <h3 className="text-5xl font-black text-white">{price.toLocaleString()}원</h3>
+                                    <span className="text-gray-500 line-through text-lg">{original.toLocaleString()}원</span>
                                 </div>
-                                <p className="text-gray-400 text-sm font-medium">단 한 번의 커피 가격으로 합격에 가까워지세요.</p>
+                                <p className="text-gray-400 text-sm font-medium">총 {totalChars.toLocaleString()}자 기준 • 커피 한 잔 가격으로 합격에 가까워지세요.</p>
                             </div>
                         </div>
 
