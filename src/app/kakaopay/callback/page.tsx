@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
 
-export default function KakaoPayCallbackPage() {
+function KakaoPayCallbackContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -62,6 +62,69 @@ export default function KakaoPayCallbackPage() {
     }, [searchParams]);
 
     return (
+        <div className="max-w-md w-full bg-white rounded-[32px] border border-gray-100 shadow-xl p-10 text-center space-y-6">
+            {status === "loading" && (
+                <>
+                    <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-bold text-gray-900">결제 승인 중...</h1>
+                        <p className="text-gray-500">잠시만 기다려주세요.<br />안전하게 처리하고 있습니다.</p>
+                    </div>
+                </>
+            )}
+
+            {status === "success" && (
+                <>
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-bold text-gray-900">결제 완료!</h1>
+                        <p className="text-gray-500">{message}</p>
+                    </div>
+                    <Button
+                        onClick={() => router.push("/success")}
+                        className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold text-lg"
+                    >
+                        자기소개서 생성 시작하기
+                    </Button>
+                </>
+            )}
+
+            {status === "error" && (
+                <>
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <AlertCircle className="w-8 h-8 text-red-500" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-bold text-gray-900">결제 실패</h1>
+                        <p className="text-gray-500 break-keep">{message}</p>
+                    </div>
+                    <div className="grid gap-3">
+                        <Button
+                            onClick={() => router.push("/preview")}
+                            className="w-full h-14 rounded-2xl bg-gray-900 hover:bg-gray-800 font-bold"
+                        >
+                            다시 시도하기
+                        </Button>
+                        <Button
+                            onClick={() => router.push("/")}
+                            variant="ghost"
+                            className="w-full h-14 rounded-2xl font-medium text-gray-500"
+                        >
+                            홈으로 돌아가기
+                        </Button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+export default function KakaoPayCallbackPage() {
+    return (
         <div className="min-h-screen bg-background flex flex-col">
             <header className="border-b border-gray-100 bg-white/50 backdrop-blur-md sticky top-0 z-10">
                 <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -72,64 +135,16 @@ export default function KakaoPayCallbackPage() {
             </header>
 
             <main className="flex-1 flex items-center justify-center p-6">
-                <div className="max-w-md w-full bg-white rounded-[32px] border border-gray-100 shadow-xl p-10 text-center space-y-6">
-                    {status === "loading" && (
-                        <>
-                            <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
-                            </div>
-                            <div className="space-y-2">
-                                <h1 className="text-2xl font-bold text-gray-900">결제 승인 중...</h1>
-                                <p className="text-gray-500">잠시만 기다려주세요.<br />안전하게 처리하고 있습니다.</p>
-                            </div>
-                        </>
-                    )}
-
-                    {status === "success" && (
-                        <>
-                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <CheckCircle className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <div className="space-y-2">
-                                <h1 className="text-2xl font-bold text-gray-900">결제 완료!</h1>
-                                <p className="text-gray-500">{message}</p>
-                            </div>
-                            <Button
-                                onClick={() => router.push("/success")}
-                                className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold text-lg"
-                            >
-                                자기소개서 생성 시작하기
-                            </Button>
-                        </>
-                    )}
-
-                    {status === "error" && (
-                        <>
-                            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <AlertCircle className="w-8 h-8 text-red-500" />
-                            </div>
-                            <div className="space-y-2">
-                                <h1 className="text-2xl font-bold text-gray-900">결제 실패</h1>
-                                <p className="text-gray-500 break-keep">{message}</p>
-                            </div>
-                            <div className="grid gap-3">
-                                <Button
-                                    onClick={() => router.push("/preview")}
-                                    className="w-full h-14 rounded-2xl bg-gray-900 hover:bg-gray-800 font-bold"
-                                >
-                                    다시 시도하기
-                                </Button>
-                                <Button
-                                    onClick={() => router.push("/")}
-                                    variant="ghost"
-                                    className="w-full h-14 rounded-2xl font-medium text-gray-500"
-                                >
-                                    홈으로 돌아가기
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
+                <Suspense fallback={
+                    <div className="max-w-md w-full bg-white rounded-[32px] border border-gray-100 shadow-xl p-10 text-center space-y-6">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900">페이지 로딩 중...</h1>
+                    </div>
+                }>
+                    <KakaoPayCallbackContent />
+                </Suspense>
             </main>
         </div>
     );
