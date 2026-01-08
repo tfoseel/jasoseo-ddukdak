@@ -16,7 +16,8 @@ export async function POST(req: Request) {
         const partner_order_id = `order_${Date.now()}`;
         const partner_user_id = user_id || "guest";
 
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const origin = req.headers.get("origin");
+        const baseUrl = origin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
         const result = await readyPayment({
             partner_order_id,
