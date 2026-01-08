@@ -6,6 +6,7 @@ import { ArrowRight, Check, HelpCircle, X } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/ui/Logo";
+import { Footer } from "@/components/layout/Footer";
 
 export default function Home() {
   return (
@@ -32,7 +33,7 @@ export default function Home() {
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.1] text-gray-900 break-keep">
             글을 쓰지 않아도,<br className="hidden sm:block" />
             <span className="text-primary relative inline-block">
-              선택만 하면
+              질문에 답하다 보면
               <svg className="absolute w-full h-3 -bottom-1 left-0 text-blue-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
               </svg>
@@ -153,16 +154,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-12 text-center text-xs text-gray-400 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-6 space-y-2">
-          <div className="flex flex-col items-center justify-center gap-2 mb-2">
-            <Logo />
-            <p className="font-semibold text-gray-900">자소서 뚝딱</p>
-          </div>
-          <p>문의: smilelee9@naver.com</p>
-          <p>© 2026 Leesoft. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer className="bg-white/50 backdrop-blur-sm" />
     </div>
   );
 }

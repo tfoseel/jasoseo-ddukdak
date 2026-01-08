@@ -2,7 +2,10 @@
 
 import { useInterviewStore } from "@/lib/store";
 import { Button } from "@/components/ui/Button";
+import { KakaoPayButton } from "@/components/payment/KakaoPayButton";
+import { StripeButton } from "@/components/payment/StripeButton";
 import { Logo } from "@/components/ui/Logo";
+import { Footer } from "@/components/layout/Footer";
 import { ArrowLeft, CreditCard, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -198,11 +201,15 @@ export default function PreviewPage() {
                         </div>
 
                         <div className="grid gap-3">
-                            <Link href="/success">
-                                <Button size="lg" className="w-full h-16 rounded-2xl bg-blue-600 hover:bg-blue-500 text-lg font-bold shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all">
-                                    커피 한 잔 값으로 초안 보기 <Sparkles className="ml-2 w-5 h-5 fill-white" />
-                                </Button>
-                            </Link>
+                            <div className="flex flex-col gap-3">
+                                <KakaoPayButton
+                                    itemName="자기소개서 초안 생성"
+                                    amount={price}
+                                    userId={basicInfo.email}
+                                    onError={(msg: string) => alert(msg)}
+                                />
+                                {/* <StripeButton price={price} /> */}
+                            </div>
                             <Button
                                 variant="outline"
                                 size="lg"
@@ -224,10 +231,7 @@ export default function PreviewPage() {
                 </div>
             </main>
 
-            <footer className="py-12 text-center text-[10px] text-gray-400 border-t border-gray-50 space-y-2">
-                <p>문의: smilelee9@naver.com</p>
-                <p>© 2026 Leesoft. All rights reserved.</p>
-            </footer>
+            <Footer />
         </div>
     );
 }

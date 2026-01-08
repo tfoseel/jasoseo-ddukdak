@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "자소서 뚝딱 | 10분 만에 끝내는 자소서 인터뷰",
-  description: "글을 쓰지 않아도, 선택만 하면 자소서 초안이 완성됩니다.",
+  description: "글을 쓰지 않아도, 질문에 답하다 보면 자소서 초안이 완성됩니다.",
   icons: {
     icon: "/favicon.png",
   },
