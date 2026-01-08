@@ -20,7 +20,7 @@ export function BasicInfoStep() {
     };
 
     const addQuestion = () => {
-        updateBasicInfo({ questions: [...basicInfo.questions, { content: "", maxChars: 500 }] });
+        updateBasicInfo({ questions: [...basicInfo.questions, { content: "", maxChars: 1000 }] });
     };
 
     const removeQuestion = (index: number) => {
@@ -75,7 +75,37 @@ export function BasicInfoStep() {
             </div>
 
             <div className="space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap gap-2">
+                    {[
+                        { label: "지원 동기", q: "회사를 지원하게 된 동기와 입사 후 포부에 대해 기술해 주십시오." },
+                        { label: "성장 과정", q: "본인의 성장 과정과 가치관에 가장 큰 영향을 미친 사건에 대해 기술해 주십시오." },
+                        { label: "장단점", q: "자신의 장점과 단점을 사례를 들어 설명하고, 단점을 보완하기 위한 노력을 기술해 주십시오." },
+                        { label: "성장 계획", q: "입사 후 5년, 10년 뒤의 커리어 로드맵과 성장 계획에 대해 기술해 주십시오." },
+                        { label: "인상깊은 경험", q: "살면서 가장 도전적이었거나 인상 깊었던 경험과 그를 통해 얻은 교훈을 기술해 주십시오." },
+                        { label: "의사소통", q: "조직 내에서 갈등을 해결하거나 효과적으로 의사소통을 했던 경험을 기술해 주십시오." },
+                    ].map((sample, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                                // Find first empty question or add new one
+                                const emptyIndex = basicInfo.questions.findIndex(q => q.content.trim() === "");
+                                if (emptyIndex !== -1) {
+                                    handleQuestionChange(emptyIndex, sample.q);
+                                } else if (basicInfo.questions.length < 5) {
+                                    updateBasicInfo({ questions: [...basicInfo.questions, { content: sample.q, maxChars: 1000 }] });
+                                } else {
+                                    alert("최대 5개 문항까지 입력 가능합니다.");
+                                }
+                            }}
+                            className="px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold border border-blue-100 hover:bg-blue-100 transition-colors"
+                        >
+                            + {sample.label}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
                     <label className="text-sm font-semibold text-gray-700">자소서 문항 (최대 5개)</label>
                     <span className="text-xs text-gray-400">{basicInfo.questions.length} / 5</span>
                 </div>
@@ -105,7 +135,7 @@ export function BasicInfoStep() {
                                             handleMaxCharsChange(index, clamped);
                                         }}
                                         className="w-16 h-7 bg-gray-50 border border-gray-100 rounded-lg text-[11px] font-bold text-center focus:border-primary outline-none"
-                                        placeholder="500"
+                                        placeholder="1000"
                                     />
                                 </div>
                             </div>
