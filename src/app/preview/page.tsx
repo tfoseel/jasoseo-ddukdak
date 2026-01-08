@@ -189,14 +189,36 @@ export default function PreviewPage() {
                 <div className="p-8 rounded-[40px] bg-gray-900 text-white shadow-2xl space-y-8 relative overflow-hidden text-center">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600 rounded-full blur-[80px] opacity-50" />
                     <div className="relative z-10 space-y-8">
-                        <div className="space-y-3">
-                            <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/30">Special Launch Price</span>
-                            <div className="flex flex-col items-center gap-1">
+                        <div className="space-y-4">
+                            <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest border border-blue-500/30">Pricing Plans</span>
+
+                            <div className="grid grid-cols-1 gap-2 max-w-sm mx-auto">
+                                {[
+                                    { range: "1,500자 이하", price: 1900 },
+                                    { range: "1,501자 ~ 3,000자", price: 2900 },
+                                    { range: "3,001자 ~ 5,000자", price: 3900 },
+                                    { range: "5,001자 이상", price: 4900 },
+                                ].map((tier, i) => {
+                                    const isCurrent = (totalChars <= 1500 && i === 0) ||
+                                        (totalChars > 1500 && totalChars <= 3000 && i === 1) ||
+                                        (totalChars > 3000 && totalChars <= 5000 && i === 2) ||
+                                        (totalChars > 5000 && i === 3);
+
+                                    return (
+                                        <div key={i} className={`flex justify-between items-center px-4 py-2 rounded-xl text-xs border ${isCurrent ? 'bg-blue-600/20 border-blue-500 text-white' : 'bg-white/5 border-white/10 text-gray-400'}`}>
+                                            <span>{tier.range}</span>
+                                            <span className="font-bold">{tier.price.toLocaleString()}원</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="flex flex-col items-center gap-1 pt-4">
                                 <div className="flex items-baseline gap-2">
                                     <h3 className="text-5xl font-black text-white">{price.toLocaleString()}원</h3>
                                     <span className="text-gray-500 line-through text-lg">{original.toLocaleString()}원</span>
                                 </div>
-                                <p className="text-gray-400 text-sm font-medium">총 {totalChars.toLocaleString()}자 기준 • 커피 한 잔 가격으로 합격에 가까워지세요.</p>
+                                <p className="text-blue-400 text-sm font-bold">현재 고객님은 '{totalChars.toLocaleString()}자' 플랜이 적용되었습니다.</p>
                             </div>
                         </div>
 

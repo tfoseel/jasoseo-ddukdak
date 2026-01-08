@@ -34,17 +34,36 @@ export default function TermsPage() {
 
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-gray-900 border-b pb-2">제2조 (환불 규정)</h2>
-                        <div className="text-gray-600 text-sm leading-relaxed space-y-2">
-                            <p><strong>1. 서비스 특성에 따른 환불 제한</strong><br />
-                                본 서비스는 결제 즉시 AI가 개인화된 콘텐츠를 생성하여 제공하는 디지털 콘텐츠 서비스입니다. 전자상거래 등에서의 소비자보호에 관한 법률 제17조 제2항 제5호에 따라, 디지털 콘텐츠의 제공이 개시된 경우(결제 후 결과물을 확인한 경우)에는 청약철회(환불)가 제한될 수 있습니다.</p>
+                        <div className="text-gray-600 text-sm leading-relaxed space-y-4">
+                            <div>
+                                <p className="font-bold text-gray-900 mb-2">1. 서비스 특성에 따른 환불 제한</p>
+                                <p>본 서비스는 결제 즉시 AI가 개인화된 콘텐츠를 생성하여 제공하는 디지털 콘텐츠 서비스입니다. 전자상거래 등에서의 소비자보호에 관한 법률 제17조 제2항 제5호에 따라, 디지털 콘텐츠의 제공이 개시된 경우(결제 후 결과물을 확인한 경우)에는 청약철회(환불)가 제한됩니다.</p>
+                            </div>
 
-                            <p><strong>2. 환불이 가능한 경우</strong><br />
-                                - 결제 후 시스템 오류로 인해 결과물이 생성되지 않은 경우<br />
-                                - 서비스 이용이 불가능한 기술적 결함이 발생한 경우<br />
-                                위 사유에 해당할 경우, 고객센터(smilelee9@naver.com)로 문의 주시면 확인 후 전액 환불해 드립니다.</p>
+                            <div className="bg-gray-50 p-6 rounded-2xl space-y-3">
+                                <p className="font-bold text-gray-900 flex items-center gap-2">
+                                    <span className="text-blue-600">✅</span> 환불이 가능한 예시
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 pl-2">
+                                    <li>결제 완료 후 시스템 오류로 인해 결과물 생성 페이지로 이동하지 못한 경우</li>
+                                    <li>AI 생성 엔진의 문제로 인해 텍스트 대신 오류 메시지만 출력된 경우</li>
+                                    <li>이동통신사/카드사 등의 결제 시스템 오류로 중복 결제가 발생한 경우</li>
+                                </ul>
 
-                            <p><strong>3. 환불 절차</strong><br />
-                                환불 요청은 이메일을 통해 접수하며, 회사는 사유를 검토한 후 5영업일 이내에 환불 처리를 진행합니다.</p>
+                                <p className="font-bold text-gray-900 flex items-center gap-2 pt-2">
+                                    <span className="text-red-500">❌</span> 환불이 불가능한 예시
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 pl-2">
+                                    <li>결제 후 제공된 초안의 내용이 단순히 주관적인 기대치에 미치지 못하는 경우</li>
+                                    <li>결제 완료 후 결과물을 확인하였으나, 단순 변심으로 환불을 요청하는 경우</li>
+                                    <li>사용자 본인의 부주의로 잘못된 정보를 입력하여 생성된 결과물의 경우</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p className="font-bold text-gray-900 mb-2">2. 환불 절차</p>
+                                <p>환불 요청은 이메일(smilelee9@naver.com)을 통해 접수하며, 회사는 사유를 검토한 후 영업일 기준 5일 이내에 환불 처리를 진행합니다. (결제 수단 및 카드사에 따라 환불 완료까지의 기간은 상이할 수 있습니다.)</p>
+                            </div>
                         </div>
                     </section>
 
