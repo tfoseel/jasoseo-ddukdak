@@ -3,6 +3,7 @@
 import { Logo } from "@/components/ui/Logo";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Footer } from "@/components/layout/Footer";
 
 export default function TermsPage() {
     return (
@@ -40,24 +41,31 @@ export default function TermsPage() {
                                 <p>본 서비스는 결제 즉시 AI가 개인화된 콘텐츠를 생성하여 제공하는 디지털 콘텐츠 서비스입니다. 전자상거래 등에서의 소비자보호에 관한 법률 제17조 제2항 제5호에 따라, 디지털 콘텐츠의 제공이 개시된 경우(결제 후 결과물을 확인한 경우)에는 청약철회(환불)가 제한됩니다.</p>
                             </div>
 
-                            <div className="bg-gray-50 p-6 rounded-2xl space-y-3">
-                                <p className="font-bold text-gray-900 flex items-center gap-2">
-                                    <span className="text-blue-600">✅</span> 환불이 가능한 예시
-                                </p>
-                                <ul className="list-disc list-inside space-y-1 pl-2">
-                                    <li>결제 완료 후 시스템 오류로 인해 결과물 생성 페이지로 이동하지 못한 경우</li>
-                                    <li>AI 생성 엔진의 문제로 인해 텍스트 대신 오류 메시지만 출력된 경우</li>
-                                    <li>이동통신사/카드사 등의 결제 시스템 오류로 중복 결제가 발생한 경우</li>
-                                </ul>
+                            <div className="bg-gray-50 p-6 rounded-2xl space-y-4">
+                                <div>
+                                    <p className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                                        <span className="text-blue-600">✅</span> 전액 환불이 가능한 구체적 사례
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-2 pl-2">
+                                        <li><strong>시스템 오류</strong>: 결제가 완료되었음에도 서버 오류로 인해 결과물 확인 페이지로 진입하지 못한 경우</li>
+                                        <li><strong>기술적 결함</strong>: AI 생성 과정에서 중단되어 문장이 끊기거나, 텍스트가 아닌 깨진 코드가 출력된 경우</li>
+                                        <li><strong>중복 결제</strong>: 네트워크 지연 등으로 인해 동일한 주문 번호가 중복 결제된 경우</li>
+                                        <li><strong>미열람 상태</strong>: 결제 직후 결과물을 확인하지 않은 상태에서 1시간 이내에 환불을 요청하는 경우</li>
+                                    </ul>
+                                </div>
 
-                                <p className="font-bold text-gray-900 flex items-center gap-2 pt-2">
-                                    <span className="text-red-500">❌</span> 환불이 불가능한 예시
-                                </p>
-                                <ul className="list-disc list-inside space-y-1 pl-2">
-                                    <li>결제 후 제공된 초안의 내용이 단순히 주관적인 기대치에 미치지 못하는 경우</li>
-                                    <li>결제 완료 후 결과물을 확인하였으나, 단순 변심으로 환불을 요청하는 경우</li>
-                                    <li>사용자 본인의 부주의로 잘못된 정보를 입력하여 생성된 결과물의 경우</li>
-                                </ul>
+                                <div className="pt-2 border-t border-gray-100">
+                                    <p className="font-bold text-gray-900 flex items-center gap-2 mb-3">
+                                        <span className="text-red-500">❌</span> 환불이 불가능한 구체적 사례
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-2 pl-2">
+                                        <li><strong>주관적 불만족</strong>: "문체성향이 생각과 다르다", "내용이 마음에 들지 않는다" 등 결과물의 질에 대한 주관적인 판단인 경우</li>
+                                        <li><strong>사용자 과실</strong>: 오타 입력, 잘못된 경험 정보 입력, 질문과 무관하거나 의미 없는 내용(문자 나열 등) 입력으로 인해 결과물이 부정확하게 생성된 경우</li>
+                                        <li><strong>단순 변심</strong>: 결과물을 이미 확인(열람 및 복사)한 후, 더 이상 필요하지 않게 되어 환불을 요청하는 경우</li>
+                                        <li><strong>경미한 결함</strong>: AI 생성 특성상 발생할 수 있는 사소한 오탈자, 맞춤법 오류 등 서비스 이용에 중대한 지장을 주지 않는 수준인 경우</li>
+                                        <li><strong>기기 호환성</strong>: 사용자 본인의 인터넷 환경 불안정이나 권장하지 않는 브라우저 사용으로 발생한 일시적 오류인 경우</li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <div>
@@ -74,19 +82,13 @@ export default function TermsPage() {
                             <li><strong>대표자</strong>: 이승우</li>
                             <li><strong>사업자등록번호</strong>: 419-37-01612</li>
                             <li><strong>주소</strong>: 서울특별시 양천구 지양로9길 23</li>
-                            <li><strong>연락처</strong>: smilelee9@naver.com</li>
+                            <li><strong>연락처</strong>: smilelee9@naver.com | 010-2871-2980</li>
                         </ul>
                     </section>
                 </div>
             </main>
 
-            <footer className="py-12 border-t border-gray-100 bg-white">
-                <div className="max-w-3xl mx-auto px-6 text-center text-xs text-gray-400 space-y-2">
-                    <p>리소프트 | 대표: 이승우 | 사업자등록번호: 419-37-01612</p>
-                    <p>주소: 서울특별시 양천구 지양로9길 23 | 이메일: smilelee9@naver.com</p>
-                    <p className="pt-2">© 2026 Leesoft. All rights reserved.</p>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 }

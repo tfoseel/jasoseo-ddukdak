@@ -13,12 +13,15 @@ export function Footer({ className }: FooterProps) {
                     <p className="font-bold text-gray-500">리소프트 (Leesoft)</p>
                     <p>대표자: 이승우 | 사업자등록번호: 419-37-01612</p>
                     <p>주소: 서울특별시 양천구 지양로9길 23</p>
-                    <p>문의: smilelee9@naver.com</p>
+                    <p>문의: smilelee9@naver.com | 010-2871-2980</p>
                 </div>
 
-                <div className="flex justify-center gap-6 text-[10px] text-gray-400 font-medium">
+                <div className="flex justify-center flex-wrap gap-x-6 gap-y-2 text-[10px] text-gray-400 font-medium">
                     <Link href="/terms" className="hover:text-gray-600 underline underline-offset-2">
                         이용약관 및 환불규정
+                    </Link>
+                    <Link href="/privacy" className="hover:text-gray-600 underline underline-offset-2">
+                        개인정보처리방침
                     </Link>
                     <span>© 2026 Leesoft. All rights reserved.</span>
                 </div>
