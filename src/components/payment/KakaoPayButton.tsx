@@ -53,7 +53,7 @@ export function KakaoPayButton({ itemName, amount, userId, onSuccess, onError }:
         <Button
             onClick={handlePayment}
             disabled={isLoading}
-            className="w-full h-14 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold"
+            className="w-full h-14 bg-[#FEE500] hover:bg-[#FDD000] text-gray-900 font-bold rounded-2xl transition-colors"
         >
             {isLoading ? (
                 <>
