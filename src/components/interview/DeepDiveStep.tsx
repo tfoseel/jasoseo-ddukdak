@@ -202,20 +202,29 @@ export function DeepDiveStep() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Project Tabs */}
             <div className="flex gap-2 p-1 bg-gray-100 rounded-xl overflow-x-auto no-scrollbar">
-                {projects.map((p, idx) => (
-                    <button
-                        key={p.id}
-                        onClick={() => setActiveProjectIndex(idx)}
-                        className={cn(
-                            "whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all shrink-0",
-                            activeProjectIndex === idx
-                                ? "bg-white text-gray-900 shadow-sm"
-                                : "text-gray-400 hover:text-gray-600"
-                        )}
-                    >
-                        {p.name || `경험 ${idx + 1}`}
-                    </button>
-                ))}
+                {projects.map((p, idx) => {
+                    const answer = deepDiveAnswers.find(a => a.projectId === p.id);
+                    const isCompleted = answer && answer.problem.trim() !== "" && answer.result.trim() !== "";
+
+                    return (
+                        <button
+                            key={p.id}
+                            onClick={() => setActiveProjectIndex(idx)}
+                            className={cn(
+                                "whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-2",
+                                activeProjectIndex === idx
+                                    ? "bg-white text-gray-900 shadow-sm"
+                                    : "text-gray-400 hover:text-gray-600"
+                            )}
+                        >
+                            <span className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                isCompleted ? "bg-green-500" : "bg-amber-400"
+                            )} />
+                            {p.name || `경험 ${idx + 1}`}
+                        </button>
+                    );
+                })}
             </div>
 
             <div className="space-y-12">

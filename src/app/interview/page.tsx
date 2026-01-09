@@ -46,9 +46,9 @@ export default function InterviewPage() {
             case "projects":
                 return projects.length > 0;
             case "deep_dive":
-                // At least ONE project must have problem + result filled
+                // ALL selected projects must have problem + result filled
                 if (projects.length === 0) return false;
-                return projects.some(proj => {
+                return projects.every(proj => {
                     const answer = deepDiveAnswers.find(a => a.projectId === proj.id);
                     if (!answer) return false;
                     return (
@@ -85,7 +85,7 @@ export default function InterviewPage() {
             case "projects":
                 return "최소 1개 이상의 경험을 등록해 주세요.";
             case "deep_dive":
-                return "최소 1개 경험에 '문제 상황'과 '결과'를 입력해 주세요.";
+                return "모든 경험에 '문제 상황'과 '결과'를 입력해 주세요.";
             case "tone":
                 return "톤을 선택해 주세요.";
             default:
